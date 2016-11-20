@@ -113,7 +113,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 	// Load configuration
 	config, err := Load()
 	if err != nil {
-		fmt.Println("Failed to load configuration file, error: ", err)
+		fmt.Fprintf(os.Stderr, "Failed to load configuration file, error: ", err)
 		return false
 	}
 
@@ -126,8 +126,8 @@ func (cfg) Execute(context extpoints.Context) bool {
 		// Parse the key
 		parts := strings.SplitN(k, ".", 2)
 		if k != "" && len(parts) != 2 {
-			fmt.Printf("Invalid key format: '%s', configuration keys must be\n", k)
-			fmt.Println("on the form '<command>.<option>'.")
+			fmt.Fprintf(os.Stderr, "Invalid key format: '%s', configuration keys must be\n", k)
+			fmt.Fprintf(os.Stderr, "on the form '<command>.<option>'.")
 			return false
 		}
 		name = parts[0]
@@ -136,7 +136,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 		// Find command provider
 		cmd := extpoints.CommandProviders()[name]
 		if cmd == nil {
-			fmt.Printf("Configuration key: '%s' references an unknown command: '%s'\n", k, name)
+			fmt.Fprintf(os.Stderr, "Configuration key: '%s' references an unknown command: '%s'\n", k, name)
 			return false
 		}
 
@@ -150,7 +150,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 
 		// If no option was found, we print an error
 		if option == nil {
-			fmt.Printf("Configuration option: '%s' is not valid (no such option)\n", k)
+			fmt.Fprintf(os.Stderr, "Configuration option: '%s' is not valid (no such option)\n", k)
 			if options != nil {
 				fmt.Printf("The command '%s' does support options:\n", name)
 				maxLength := 0 // find max length for alignment
@@ -184,7 +184,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 		if data == "-" {
 			d, err := ioutil.ReadAll(os.Stdin)
 			if err != nil {
-				fmt.Println("Failed to read value from stdin, error: ", err)
+				fmt.Fprintf(os.Stderr, "Failed to read value from stdin, error: ", err)
 				return false
 			}
 			data = string(d)
@@ -194,7 +194,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 		if option.Parse {
 			err := json.Unmarshal([]byte(data), &value)
 			if err != nil {
-				fmt.Printf("Failed to parse JSON value, error: %s\n", err)
+				fmt.Fprintf(os.Stderr, "Failed to parse JSON value, error: %s\n", err)
 				return false
 			}
 		} else {
@@ -204,7 +204,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 		// Validate value
 		if option.Validate != nil {
 			if err := option.Validate(value); err != nil {
-				fmt.Println("Invalidate value, error: ", err)
+				fmt.Fprintf(os.Stderr, "Invalidate value, error: ", err)
 				return false
 			}
 		}
@@ -213,7 +213,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 		if argv["--dry-run"] == false {
 			config[name][key] = value
 			if err := Save(config); err != nil {
-				fmt.Println("Failed to save configuration file, error: ", err)
+				fmt.Fprintf(os.Stderr, "Failed to save configuration file, error: ", err)
 				return false
 			}
 		}
@@ -236,7 +236,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 
 		// Save configuration
 		if err := Save(config); err != nil {
-			fmt.Println("Failed to save configuration file, error: ", err)
+			fmt.Fprintf(os.Stderr, "Failed to save configuration file, error: ", err)
 			return false
 		}
 
@@ -247,7 +247,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 			if f == "json" {
 				formatter = formatJSON
 			} else if f != "yaml" {
-				fmt.Printf("Unsupported output format: %s\n", f)
+				fmt.Fprintf(os.Stderr, "Unsupported output format: %s\n", f)
 				return false
 			}
 		}
@@ -258,7 +258,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 			if o != "-" {
 				outFile, err := os.Create(o)
 				if err != nil {
-					fmt.Printf("Failed to create output file '%s' error: %s\n", o, err)
+					fmt.Fprintf(os.Stderr, "Failed to create output file '%s' error: %s\n", o, err)
 					return false
 				}
 				defer outFile.Close()
@@ -273,7 +273,7 @@ func (cfg) Execute(context extpoints.Context) bool {
 
 		// Write output
 		if _, err := out.Write(formatter(value)); err != nil {
-			fmt.Println("Error writing result, error: ", err)
+			fmt.Fprintf(os.Stderr, "Error writing result, error: ", err)
 			return false
 		}
 	}

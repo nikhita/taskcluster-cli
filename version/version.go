@@ -37,7 +37,6 @@ func (version) Execute(context extpoints.Context) bool {
 	provider := extpoints.CommandProviders()[command]
 	if provider == nil {
 		panic(fmt.Sprintf("Unknown command: %s", command))
-		return false
 	}
 	fmt.Println(VersionNumber)
 	return true

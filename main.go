@@ -49,7 +49,7 @@ func main() {
 	// Load config file
 	config, err := config.Load()
 	if err != nil {
-		fmt.Println("Failed to load configuration file, error: ", err)
+		fmt.Fprintf(os.Stderr, "Failed to load configuration file, error: ", err)
 		os.Exit(1)
 	}
 
